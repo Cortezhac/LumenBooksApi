@@ -60,6 +60,9 @@ class BookController extends Controller
      */
     public function show($id){
 
+        $book = Book::findOrFail($id);
+
+        return $this->successResponse($book);
     }
 
     /**
@@ -68,7 +71,30 @@ class BookController extends Controller
      * @param $id
      */
     public function update(Request $request, $id){
+        $rules = [
+            'title' => 'max:255',
+            'description'=>'max:400',
+            'price' => 'min:1',
+            'author_id' => 'min:1'
+        ];
 
+        $this->validate($request, $rules);
+
+        $book = Book::findOrFail($id);
+
+        $book->fill([
+            'title'=> $request->title,
+            'description'=> $request->description,
+            'price' => $request->price,
+            'author_id' => $request->author_id
+        ]);
+
+        if($book->isDirty()){
+            $book->save();
+            return $this->successResponse($book);
+        }
+
+        return $this->errorResponse('At least one value must change',Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     /**
@@ -76,6 +102,10 @@ class BookController extends Controller
      * @param $id
      */
     public function destroy($id){
+        $book = Book::findOrFail($id);
 
+        $book->delete();
+
+        return $this->successResponse($book);
     }
 }
