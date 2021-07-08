@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Book;
 use App\Traits\ApiResponser;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class BookController extends Controller
 {
@@ -24,7 +26,8 @@ class BookController extends Controller
      * @return JsonResponse
      */
     public function index(){
-
+        $books = Book::all();
+        return $this->successResponse($books);
     }
 
     /**
@@ -32,6 +35,23 @@ class BookController extends Controller
      * @param Request $request
      */
     public function store(Request $request){
+        $rules = [
+            'title'=> 'required|max:255',
+            'description'=>'required|max:400',
+            'price' => 'required|min:1',
+            'author_id' => 'required|min:1'
+        ];
+
+        $this->validate($request, $rules);
+
+        $book = Book::create([
+            'title'=> $request->title,
+            'description'=> $request->description,
+            'price' => $request->price,
+            'author_id' => $request->author_id
+        ]);
+
+        return $this->successResponse($book, Response::HTTP_CREATED);
     }
 
     /**
